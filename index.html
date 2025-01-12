@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Notebook</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .chat-box {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .chat-box textarea {
+            width: calc(100% - 22px);
+            max-height: 200px;
+            min-height: 50px;
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            overflow-y: auto;
+            box-shadow: 0 0 0 0 #fff;
+            transition: border-color 0.3s ease;
+            background-color: #fff;
+        }
+
+        .chat-box textarea:focus {
+            outline: none;
+            border-color: #10a37f;
+            box-shadow: 0 0 0 1px #10a37f;
+        }
+
+        .chat-box textarea::placeholder {
+            color: #8e8ea0;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f3f3f3;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .buttons button:hover {
+            background-color: #10a37f;
+            color: #fff;
+        }
+
+        #response-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+            word-wrap: break-word;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup-buttons button {
+            margin: 10px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #f3f3f3;
+            transition: all 0.2s ease;
+        }
+
+        .popup-buttons button:hover {
+            background-color: #10a37f;
+            color: #fff;
+        }
+
+        .search-results {
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #121212;
+            color: #f4f4f9;
+        }
+
+        .container.dark-mode {
+            background: #1e1e1e;
+            color: #f4f4f9;
+        }
+
+        .chat-box textarea.dark-mode {
+            background-color: #333;
+            border: 1px solid #444;
+            color: #f4f4f9;
+        }
+
+        .buttons button.dark-mode {
+            background-color: #333;
+            color: #f4f4f9;
+        }
+
+        .buttons button.dark-mode:hover {
+            background-color: #10a37f;
+        }
+
+        .popup-content.dark-mode {
+            background: #333;
+            color: #f4f4f9;
+        }
+
+        .popup-buttons button.dark-mode {
+            background-color: #333;
+            color: #f4f4f9;
+        }
+
+        #response-box.dark-mode {
+          background-color: #333;
+          border: 1px solid #444;
+          color: #f4f4f9;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            .chat-box textarea {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .buttons button {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+
+            #response-box {
+                max-height: 200px;
+            }
+        }
+
+        /* Toggle button style */
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: #10a37f;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="toggle-btn" onclick="toggleDarkMode()">Mode</button>
+        <h1>AI Notebook</h1>
+        <div class="chat-box">
+            <textarea
+                id="prompt"
+                placeholder="Enter your prompt..."
+                rows="1"
+                oninput="autoResize(this)"
+            ></textarea>
+            <div class="buttons">
+                <button onclick="handleSave()">Save</button>
+                <button onclick="handleReply()">Reply</button>
+                <button onclick="handleFind()">Find</button>
+                <button onclick="handleAI()">AI</button>
+            </div>
+        </div>
+        <div id="response-box" class="search-results"></div>
+    </div>
+
+    <div id="duplicateKeyPopup" class="popup-overlay">
+        <div class="popup-content">
+            <p>This key already exists. How would you like to proceed?</p>
+            <div class="popup-buttons">
+                <button onclick="handleDuplicateKey('overwrite')">Overwrite</button>
+                <button onclick="handleDuplicateKey('add')">Add</button>
+                <button onclick="handleDuplicateKey('cancel')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Auto-resize textarea function
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        const minHeight = 50;
+        const maxHeight = 200;
+        const scrollHeight = textarea.scrollHeight;
+
+        textarea.style.height = Math.min(Math.max(scrollHeight, minHeight), maxHeight) + 'px';
+
+        // Show/hide scrollbar based on content
+        if (scrollHeight > maxHeight) {
+            textarea.style.overflowY = 'auto';
+        } else {
+            textarea.style.overflowY = 'hidden';
+        }
+    }
+
+    // Initialize textarea height on page load
+    window.onload = function() {
+        const textarea = document.getElementById('prompt');
+        autoResize(textarea);
+
+        // Also resize on window resize
+        window.addEventListener('resize', function() {
+            autoResize(textarea);
+        });
+    }
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+        const body = document.body;
+        const container = document.querySelector('.container');
+        const textarea = document.querySelector('.chat-box textarea');
+        const buttons = document.querySelectorAll('.buttons button');
+        const popupContent = document.querySelector('.popup-content');
+        const popupButtons = document.querySelectorAll('.popup-buttons button');
+        const responseBox = document.getElementById('response-box');
+
+        body.classList.toggle('dark-mode');
+        container.classList.toggle('dark-mode');
+        textarea.classList.toggle('dark-mode');
+        buttons.forEach(button => button.classList.toggle('dark-mode'));
+        popupContent.classList.toggle('dark-mode');
+        popupButtons.forEach(button => button.classList.toggle('dark-mode'));
+        responseBox.classList.toggle('dark-mode');
+    }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
